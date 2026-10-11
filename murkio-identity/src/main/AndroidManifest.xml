@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+        <!--
+            Starts the SDK from the app's manifest, so an app that declares
+            com.murkio.identity.PUBLISHABLE_KEY needs no code to set it up.
+        -->
+        <provider
+            android:name="com.murkio.identity.android.MurkioInitProvider"
+            android:authorities="${applicationId}.murkio-identity-init"
+            android:exported="false" />
+    </application>
+</manifest>
