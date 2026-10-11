@@ -215,6 +215,9 @@ of the canvas itself come translated from the dashboard.
 
 ## Developing
 
+This repository is a git submodule of the Murkio identity service
+(`libs/external/kotlin`), and the commands below run from that checkout.
+
 ```sh
 ./gradlew :murkio-identity:testDebugUnitTest :murkio-identity:assembleRelease
 ```
