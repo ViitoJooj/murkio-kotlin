@@ -33,14 +33,13 @@ class ClientTest {
     @After
     fun tearDown() = closeClients()
 
-    private fun bootstrapRoute(etag: String? = null): Pair<String, suspend (Call) -> Answer> =
-        route("GET /v1/client") { call ->
-            if (etag != null && call.headers["If-None-Match"] == etag) {
-                Answer(304)
-            } else {
-                Answer.data(bootstrapJson(), headers = if (etag == null) emptyMap() else mapOf("etag" to etag))
-            }
+    private fun bootstrapRoute(etag: String? = null): Pair<String, suspend (Call) -> Answer> = route("GET /v1/client") { call ->
+        if (etag != null && call.headers["If-None-Match"] == etag) {
+            Answer(304)
+        } else {
+            Answer.data(bootstrapJson(), headers = if (etag == null) emptyMap() else mapOf("etag" to etag))
         }
+    }
 
     @Test
     fun onlyAPublishableKeyIsAccepted() = runTest {
@@ -134,8 +133,13 @@ class ClientTest {
                 route("POST /v1/me") {
                     Answer.data(
                         mapOf(
-                            "id" to "user-1", "session_id" to "session-1", "email" to "ana@example.com", "email_verified" to true,
-                            "roles" to listOf("user", "admin"), "mfa_enabled" to false, "created_at" to "2029-05-01T10:00:00Z",
+                            "id" to "user-1",
+                            "session_id" to "session-1",
+                            "email" to "ana@example.com",
+                            "email_verified" to true,
+                            "roles" to listOf("user", "admin"),
+                            "mfa_enabled" to false,
+                            "created_at" to "2029-05-01T10:00:00Z",
                         ),
                     )
                 },
@@ -210,8 +214,7 @@ class ClientTest {
             opens
         })
 
-    private fun attempt(client: MurkioClient): Map<String, Any?> =
-        Json.parse(oauthStorage.read("murkio.${client.keyHash}.oauth")!!).obj()!!
+    private fun attempt(client: MurkioClient): Map<String, Any?> = Json.parse(oauthStorage.read("murkio.${client.keyHash}.oauth")!!).obj()!!
 
     @Test
     fun socialSignInStartsWithPkceAndOpensTheProvider() = runTest {

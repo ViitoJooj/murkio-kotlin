@@ -5,17 +5,20 @@ import android.graphics.BitmapFactory
 import android.util.LruCache
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import com.murkio.identity.android.internal.base64Decode
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private const val MAX_BYTES = 4 * 1024 * 1024
 private const val MAX_SIDE = 2048
@@ -68,6 +71,7 @@ internal suspend fun loadCanvasImage(src: String): ImageBitmap? = withContext(Di
 
 @Composable
 internal fun CanvasImage(src: String, description: String?, modifier: Modifier = Modifier) {
-    val bitmap by produceState<ImageBitmap?>(initialValue = null, src) { value = loadCanvasImage(src) }
+    var bitmap by remember(src) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(src) { bitmap = loadCanvasImage(src) }
     bitmap?.let { Image(it, contentDescription = description, modifier = modifier, contentScale = ContentScale.Fit) }
 }

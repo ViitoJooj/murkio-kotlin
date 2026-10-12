@@ -27,8 +27,7 @@ internal fun randomString(length: Int, random: SecureRandom = SecureRandom()): S
 }
 
 /** S256 code challenge of a PKCE verifier (RFC 7636). */
-internal fun codeChallenge(verifier: String): String =
-    base64UrlEncode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray(Charsets.UTF_8)))
+internal fun codeChallenge(verifier: String): String = base64UrlEncode(MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray(Charsets.UTF_8)))
 
 private const val URL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 

@@ -41,8 +41,7 @@ class SessionTest {
     private suspend fun signIn(client: MurkioClient, keepLogged: Boolean = true, id: String = "session-1"): MurkioSession =
         client.sessions.setSession(tokenPair(sessionId = id, nowMs = time), keepLogged)
 
-    private fun refreshing(): Pair<String, suspend (Call) -> Answer> =
-        route("POST /v1/token/refresh") { Answer.data(tokens(nowMs = time)) }
+    private fun refreshing(): Pair<String, suspend (Call) -> Answer> = route("POST /v1/token/refresh") { Answer.data(tokens(nowMs = time)) }
 
     private suspend fun expectError(code: String, block: suspend () -> Unit) {
         try {
@@ -203,8 +202,11 @@ class SessionTest {
             key,
             Json.write(
                 mapOf(
-                    "accessToken" to "old-access", "refreshToken" to "old-refresh", "expiresAt" to time + 300_000,
-                    "sessionId" to "session-of-a-previous-run", "ephemeral" to true,
+                    "accessToken" to "old-access",
+                    "refreshToken" to "old-refresh",
+                    "expiresAt" to time + 300_000,
+                    "sessionId" to "session-of-a-previous-run",
+                    "ephemeral" to true,
                 ),
             ),
         )

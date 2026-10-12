@@ -1,5 +1,7 @@
 package com.murkio.identity.android.ui
 
+import android.content.res.Configuration
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
@@ -183,4 +185,12 @@ internal fun Modifier.elementBox(look: ElementLook): Modifier {
     // The border is drawn inside the box, so the content starts after it, like a CSS border-box.
     val inset = if (hasBorder) look.borderWidth else 0f
     return result.padding(horizontal = (look.paddingX + inset).dp, vertical = (look.paddingY + inset).dp)
+}
+
+/** The language of the device. `Configuration.getLocales` only exists from Android 7.0 (API 24). */
+internal fun Configuration.primaryLanguageTag(): String? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    locales.get(0)?.toLanguageTag()
+} else {
+    @Suppress("DEPRECATION")
+    locale?.toLanguageTag()
 }

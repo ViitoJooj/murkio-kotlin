@@ -532,7 +532,19 @@ class CanvasUiTest {
         val client = uiClient(canvasApi(document = document2), opener = { url -> opened.add(url) })
         compose.setContent {
             Box(Modifier.requiredWidth(400.dp)) {
-                MurkioIdentityCanvas(client = client, onLink = if (handle) ({ href: String -> tapped.add(href); Unit }) else null)
+                MurkioIdentityCanvas(
+                    client = client,
+                    onLink = if (handle) {
+                        (
+                            { href: String ->
+                                tapped.add(href)
+                                Unit
+                            }
+                            )
+                    } else {
+                        null
+                    },
+                )
             }
         }
         compose.waitForIdle()

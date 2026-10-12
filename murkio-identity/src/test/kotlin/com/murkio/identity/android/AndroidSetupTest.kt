@@ -83,7 +83,11 @@ class AndroidSetupTest {
     fun comingToTheForegroundRenewsATokenThatIsDue() {
         val api = FakeApi(mutableMapOf(route("POST /v1/token/refresh") { Answer.data(tokens()) }))
         val client = Murkio.initialize(
-            application, "pk_lifecycle", apiUrl = "https://api.example.com", storage = MurkioMemoryStorage(), transport = api,
+            application,
+            "pk_lifecycle",
+            apiUrl = "https://api.example.com",
+            storage = MurkioMemoryStorage(),
+            transport = api,
         )
         val old = runBlocking {
             client.start()

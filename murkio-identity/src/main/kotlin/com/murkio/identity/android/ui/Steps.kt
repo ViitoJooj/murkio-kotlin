@@ -140,7 +140,10 @@ internal fun StepView(
     @Composable
     fun Primary(label: String, onClick: () -> Unit) {
         MurkioButton(
-            label, buttonLook, family, onClick,
+            label,
+            buttonLook,
+            family,
+            onClick,
             modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp).testTag("murkio-step-submit"),
             busy = state.busy,
         )
@@ -149,7 +152,10 @@ internal fun StepView(
     @Composable
     fun Link(label: String, tag: String, onClick: () -> Unit) {
         MurkioButton(
-            label, linkLook, family, onClick,
+            label,
+            linkLook,
+            family,
+            onClick,
             modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp).testTag(tag),
             busy = state.busy,
             underline = true,
@@ -170,9 +176,17 @@ internal fun StepView(
             when (step) {
                 is FlowStep.VerifyEmail -> {
                     Heading("verify.title", "verify.description", mapOf("email" to step.email))
-                    val submit = { scope.launch { flow.confirmEmail(code, if (step.needsPassword) password else null) }; Unit }
+                    val submit = {
+                        scope.launch { flow.confirmEmail(code, if (step.needsPassword) password else null) }
+                        Unit
+                    }
                     Field(
-                        code, { code = it }, say("verify.code"), FieldKind.CODE, "murkio-step-code", first,
+                        code,
+                        { code = it },
+                        say("verify.code"),
+                        FieldKind.CODE,
+                        "murkio-step-code",
+                        first,
                         imeAction = if (step.needsPassword) ImeAction.Next else ImeAction.Done,
                         onImeAction = { if (step.needsPassword) runCatching { second.requestFocus() } else submit() },
                     )
@@ -186,13 +200,19 @@ internal fun StepView(
                 }
                 is FlowStep.Mfa -> {
                     Heading("mfa.title", "mfa.description")
-                    val submit = { scope.launch { flow.verifyMfa(code) }; Unit }
+                    val submit = {
+                        scope.launch { flow.verifyMfa(code) }
+                        Unit
+                    }
                     Field(code, { code = it }, say("mfa.code"), FieldKind.CODE, "murkio-step-code", first, onImeAction = submit)
                     controls = { Primary(say("mfa.submit"), submit) }
                 }
                 is FlowStep.MfaEnroll -> {
                     Heading("enroll.title", "enroll.description")
-                    val submit = { scope.launch { flow.confirmEnrollment(code) }; Unit }
+                    val submit = {
+                        scope.launch { flow.confirmEnrollment(code) }
+                        Unit
+                    }
                     SelectionContainer {
                         BasicText(
                             buildAnnotatedString {
@@ -224,15 +244,26 @@ internal fun StepView(
                 }
                 is FlowStep.Forgot -> {
                     Heading("forgot.title", "forgot.description")
-                    val submit = { scope.launch { flow.requestReset(email) }; Unit }
+                    val submit = {
+                        scope.launch { flow.requestReset(email) }
+                        Unit
+                    }
                     Field(email, { email = it }, say("forgot.email"), FieldKind.EMAIL, "murkio-step-email", first, onImeAction = submit)
                     controls = { Primary(say("forgot.submit"), submit) }
                 }
                 is FlowStep.Reset -> {
                     Heading("reset.title", "reset.description", mapOf("email" to step.email))
-                    val submit = { scope.launch { flow.resetPassword(code, password) }; Unit }
+                    val submit = {
+                        scope.launch { flow.resetPassword(code, password) }
+                        Unit
+                    }
                     Field(
-                        code, { code = it }, say("reset.code"), FieldKind.CODE, "murkio-step-code", first,
+                        code,
+                        { code = it },
+                        say("reset.code"),
+                        FieldKind.CODE,
+                        "murkio-step-code",
+                        first,
                         imeAction = ImeAction.Next,
                         onImeAction = { runCatching { second.requestFocus() } },
                     )

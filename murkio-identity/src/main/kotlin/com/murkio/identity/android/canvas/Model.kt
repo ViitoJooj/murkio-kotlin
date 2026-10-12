@@ -26,15 +26,20 @@ public enum class CanvasElementType(public val wire: String) {
     LINK("link"),
     IMAGE("image"),
     SHAPE("shape"),
-    DIVIDER("divider");
+    DIVIDER("divider"),
+    ;
 
     /** Decorative elements never take a touch and are painted under the interactive ones. */
     public val decorative: Boolean get() = this == TEXT || this == IMAGE || this == SHAPE || this == DIVIDER
 
     /** The elements that only make sense with the password login. */
     public val needsPassword: Boolean
-        get() = this == EMAIL_INPUT || this == PASSWORD_INPUT || this == KEEP_LOGGED || this == LOGIN_BUTTON ||
-            this == REGISTER_BUTTON || this == FORGOT_PASSWORD_LINK
+        get() = this == EMAIL_INPUT ||
+            this == PASSWORD_INPUT ||
+            this == KEEP_LOGGED ||
+            this == LOGIN_BUTTON ||
+            this == REGISTER_BUTTON ||
+            this == FORGOT_PASSWORD_LINK
 
     internal companion object {
         fun parse(value: Any?): CanvasElementType? = entries.firstOrNull { it.wire == value }
@@ -96,29 +101,13 @@ public class CanvasElement(
 }
 
 /** Where an element sits in a layout. */
-public class CanvasItem(
-    public val x: Int,
-    public val y: Int,
-    public val w: Int,
-    public val h: Int,
-    public val z: Int,
-    public val hidden: Boolean = false,
-)
+public class CanvasItem(public val x: Int, public val y: Int, public val w: Int, public val h: Int, public val z: Int, public val hidden: Boolean = false)
 
 /** The frame of a screen at one size and where each element goes in it. [background] is ARGB, or null for a transparent frame. */
-public class CanvasLayout(
-    public val width: Int,
-    public val height: Int,
-    public val items: Map<String, CanvasItem>,
-    public val background: Int? = null,
-)
+public class CanvasLayout(public val width: Int, public val height: Int, public val items: Map<String, CanvasItem>, public val background: Int? = null)
 
 /** A screen: its elements (the content) and its layouts (the positions). */
-public class CanvasScreen(
-    public val elements: List<CanvasElement>,
-    public val desktop: CanvasLayout,
-    public val mobile: CanvasLayout? = null,
-)
+public class CanvasScreen(public val elements: List<CanvasElement>, public val desktop: CanvasLayout, public val mobile: CanvasLayout? = null)
 
 /** The font of a canvas. */
 public enum class CanvasFont { SYSTEM_SANS, SYSTEM_SERIF, SYSTEM_MONO, INHERIT }
@@ -138,8 +127,4 @@ public class CanvasTheme(
 )
 
 /** A validated canvas, ready to draw. Without [signUp] the sign-up uses the sign-in screen. */
-public class CanvasDocument(
-    public val theme: CanvasTheme,
-    public val signIn: CanvasScreen,
-    public val signUp: CanvasScreen? = null,
-)
+public class CanvasDocument(public val theme: CanvasTheme, public val signIn: CanvasScreen, public val signUp: CanvasScreen? = null)

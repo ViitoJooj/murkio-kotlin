@@ -172,77 +172,79 @@ class VectorsTest {
         val scenarios = flows["cases"].list()!!.map { it.obj()!! }
         assertTrue(scenarios.size >= 12)
 
-        for (scenario in scenarios) runTest {
-            val name = scenario["name"] as String
-            val queue = ArrayDeque<Map<String, Any?>>()
-            val transport = MurkioTransport { request ->
-                val step = queue.removeFirstOrNull() ?: throw AssertionError("$name: unexpected ${request.method} ${request.url}")
-                assertEquals(name, "${step["method"]} ${step["path"]}", "${request.method} ${request.url.removePrefix("https://api.example.com")}")
-                assertEquals(name, step["body"], request.body?.let(Json::parse))
-                assertEquals(name, "Bearer pk_vectors", request.headers["Authorization"])
-                val status = (step["status"] as Double).toInt()
-                if (status == 0) throw java.io.IOException("network down")
-                MurkioHttpResponse(status, emptyMap(), if (status == 204 || step["response"] == null) "" else Json.write(step["response"]))
-            }
-            val client = newClient(transport, locale = locale, key = "pk_vectors")
-            client.start()
-            val flow = FlowController(client)
+        for (scenario in scenarios) {
+            runTest {
+                val name = scenario["name"] as String
+                val queue = ArrayDeque<Map<String, Any?>>()
+                val transport = MurkioTransport { request ->
+                    val step = queue.removeFirstOrNull() ?: throw AssertionError("$name: unexpected ${request.method} ${request.url}")
+                    assertEquals(name, "${step["method"]} ${step["path"]}", "${request.method} ${request.url.removePrefix("https://api.example.com")}")
+                    assertEquals(name, step["body"], request.body?.let(Json::parse))
+                    assertEquals(name, "Bearer pk_vectors", request.headers["Authorization"])
+                    val status = (step["status"] as Double).toInt()
+                    if (status == 0) throw java.io.IOException("network down")
+                    MurkioHttpResponse(status, emptyMap(), if (status == 204 || step["response"] == null) "" else Json.write(step["response"]))
+                }
+                val client = newClient(transport, locale = locale, key = "pk_vectors")
+                client.start()
+                val flow = FlowController(client)
 
-            for (step in scenario["steps"].list()!!.map { it.obj()!! }) {
-                queue.addAll(step["http"].list()!!.map { it.obj()!! })
-                val args = step["args"].obj()!!
-                val credentials = MurkioCredentials(
-                    email = args["email"] as? String ?: "",
-                    password = args["password"] as? String ?: "",
-                    keepLogged = args["keep_logged"] == true,
-                )
-                val call = step["call"] as String
-                when (call) {
-                    "login" -> flow.login(credentials)
-                    "register" -> flow.register(credentials)
-                    "confirm_email" -> flow.confirmEmail(args["code"] as String, args["password"] as? String)
-                    "resend_email" -> flow.resendEmail()
-                    "verify_mfa" -> flow.verifyMfa(args["code"] as String)
-                    "confirm_enrollment" -> flow.confirmEnrollment(args["code"] as String)
-                    "finish_recovery" -> flow.finishRecovery()
-                    "forgot" -> flow.forgot(args["email"] as String)
-                    "request_reset" -> flow.requestReset(args["email"] as String)
-                    "reset_password" -> flow.resetPassword(args["code"] as String, args["password"] as String)
-                    "back" -> flow.back()
-                    else -> fail("unknown call $call")
-                }
-                val at = "$name / $call"
-                assertTrue("$at left requests unsent", queue.isEmpty())
+                for (step in scenario["steps"].list()!!.map { it.obj()!! }) {
+                    queue.addAll(step["http"].list()!!.map { it.obj()!! })
+                    val args = step["args"].obj()!!
+                    val credentials = MurkioCredentials(
+                        email = args["email"] as? String ?: "",
+                        password = args["password"] as? String ?: "",
+                        keepLogged = args["keep_logged"] == true,
+                    )
+                    val call = step["call"] as String
+                    when (call) {
+                        "login" -> flow.login(credentials)
+                        "register" -> flow.register(credentials)
+                        "confirm_email" -> flow.confirmEmail(args["code"] as String, args["password"] as? String)
+                        "resend_email" -> flow.resendEmail()
+                        "verify_mfa" -> flow.verifyMfa(args["code"] as String)
+                        "confirm_enrollment" -> flow.confirmEnrollment(args["code"] as String)
+                        "finish_recovery" -> flow.finishRecovery()
+                        "forgot" -> flow.forgot(args["email"] as String)
+                        "request_reset" -> flow.requestReset(args["email"] as String)
+                        "reset_password" -> flow.resetPassword(args["code"] as String, args["password"] as String)
+                        "back" -> flow.back()
+                        else -> fail("unknown call $call")
+                    }
+                    val at = "$name / $call"
+                    assertTrue("$at left requests unsent", queue.isEmpty())
 
-                val state = flow.state.value
-                val expected = step["expect"].obj()!!
-                assertFalse(at, state.busy)
-                assertEquals(at, expected["step"], state.step.name)
-                assertEquals(at, expected["error"], state.error?.code)
-                assertEquals(at, expected["notice"], state.notice)
-                assertEquals(at, expected["signed_in"], client.isSignedIn)
-                if (expected["signed_in"] == true) {
-                    val session = client.currentSession!!
-                    assertEquals(at, expected["ephemeral"], session.ephemeral)
-                    assertEquals(at, expected["session_id"], session.sessionId)
-                    assertEquals(at, refreshToken, session.refreshToken)
-                }
-                if ("email" in expected) assertEquals(at, expected["email"], flow.currentEmail)
-                when (val current = state.step) {
-                    is FlowStep.VerifyEmail -> {
-                        assertEquals(at, expected["email"], current.email)
-                        assertEquals(at, expected["needs_password"], current.needsPassword)
+                    val state = flow.state.value
+                    val expected = step["expect"].obj()!!
+                    assertFalse(at, state.busy)
+                    assertEquals(at, expected["step"], state.step.name)
+                    assertEquals(at, expected["error"], state.error?.code)
+                    assertEquals(at, expected["notice"], state.notice)
+                    assertEquals(at, expected["signed_in"], client.isSignedIn)
+                    if (expected["signed_in"] == true) {
+                        val session = client.currentSession!!
+                        assertEquals(at, expected["ephemeral"], session.ephemeral)
+                        assertEquals(at, expected["session_id"], session.sessionId)
+                        assertEquals(at, refreshToken, session.refreshToken)
                     }
-                    is FlowStep.Reset -> assertEquals(at, expected["email"], current.email)
-                    is FlowStep.MfaEnroll -> {
-                        assertEquals(at, expected["secret"], current.secret)
-                        assertEquals(at, expected["otpauth_uri"], current.otpauthUri)
+                    if ("email" in expected) assertEquals(at, expected["email"], flow.currentEmail)
+                    when (val current = state.step) {
+                        is FlowStep.VerifyEmail -> {
+                            assertEquals(at, expected["email"], current.email)
+                            assertEquals(at, expected["needs_password"], current.needsPassword)
+                        }
+                        is FlowStep.Reset -> assertEquals(at, expected["email"], current.email)
+                        is FlowStep.MfaEnroll -> {
+                            assertEquals(at, expected["secret"], current.secret)
+                            assertEquals(at, expected["otpauth_uri"], current.otpauthUri)
+                        }
+                        is FlowStep.RecoveryCodes -> assertEquals(at, expected["codes"], current.codes)
+                        else -> Unit
                     }
-                    is FlowStep.RecoveryCodes -> assertEquals(at, expected["codes"], current.codes)
-                    else -> Unit
                 }
+                closeClients()
             }
-            closeClients()
         }
     }
 }

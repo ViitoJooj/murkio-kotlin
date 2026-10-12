@@ -3,12 +3,12 @@ package com.murkio.identity.android
 import com.murkio.identity.android.internal.Json
 import com.murkio.identity.android.internal.obj
 import com.murkio.identity.android.internal.strings
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** A request the SDK sends to the identity API. */
 public class MurkioHttpRequest(
@@ -20,11 +20,7 @@ public class MurkioHttpRequest(
 )
 
 /** The answer to a [MurkioHttpRequest]. Header names are lowercase. */
-public class MurkioHttpResponse(
-    public val status: Int,
-    public val headers: Map<String, String>,
-    public val body: String,
-)
+public class MurkioHttpResponse(public val status: Int, public val headers: Map<String, String>, public val body: String)
 
 /**
  * How the SDK reaches the network. The default uses `HttpURLConnection`; an
@@ -50,20 +46,11 @@ internal class ApiResponse(val status: Int, val data: Any?, val headers: Map<Str
  * maps one route; errors come back as [MurkioException] with the API code.
  * It holds no state: tokens live in the session manager.
  */
-public class ApiClient internal constructor(
-    private val publishableKey: String,
-    apiUrl: String?,
-    private val transport: MurkioTransport,
-) {
+public class ApiClient internal constructor(private val publishableKey: String, apiUrl: String?, private val transport: MurkioTransport) {
     /** The base URL of the identity API, without a trailing slash. */
     public val apiUrl: String = (apiUrl ?: DEFAULT_API_URL).trimEnd('/')
 
-    internal suspend fun request(
-        method: String,
-        path: String,
-        body: Map<String, Any?>? = null,
-        headers: Map<String, String> = emptyMap(),
-    ): ApiResponse {
+    internal suspend fun request(method: String, path: String, body: Map<String, Any?>? = null, headers: Map<String, String> = emptyMap()): ApiResponse {
         val all = LinkedHashMap<String, String>()
         all["Authorization"] = "Bearer $publishableKey"
         all.putAll(headers)
@@ -129,15 +116,13 @@ public class ApiClient internal constructor(
         request("POST", "/v1/password/reset/confirm", mapOf("email" to email, "code" to code, "password" to password))
     }
 
-    public suspend fun refresh(refreshToken: String): TokenPair =
-        TokenPair.fromJson(request("POST", "/v1/token/refresh", mapOf("refresh_token" to refreshToken)).data)
+    public suspend fun refresh(refreshToken: String): TokenPair = TokenPair.fromJson(request("POST", "/v1/token/refresh", mapOf("refresh_token" to refreshToken)).data)
 
     public suspend fun logout(refreshToken: String) {
         request("POST", "/v1/logout", mapOf("refresh_token" to refreshToken))
     }
 
-    public suspend fun me(accessToken: String): MurkioUser =
-        MurkioUser.fromJson(request("POST", "/v1/me", mapOf("access_token" to accessToken)).data)
+    public suspend fun me(accessToken: String): MurkioUser = MurkioUser.fromJson(request("POST", "/v1/me", mapOf("access_token" to accessToken)).data)
 
     public suspend fun verifyMfa(mfaToken: String, code: String): TokenPair =
         TokenPair.fromJson(request("POST", "/v1/mfa/challenge/verify", mapOf("mfa_token" to mfaToken, "code" to code)).data)
