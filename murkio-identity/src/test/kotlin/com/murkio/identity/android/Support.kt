@@ -5,16 +5,16 @@ import com.murkio.identity.android.canvas.sanitizeParsed
 import com.murkio.identity.android.internal.Json
 import com.murkio.identity.android.internal.base64UrlEncode
 import com.murkio.identity.android.internal.obj
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertEquals
-import java.io.File
 
-/** libs/spec, shared with the service and the other SDKs. */
-internal val specDir: File = File(System.getProperty("murkio.spec") ?: "../../../spec")
+/** The copy of the spec every Murkio client SDK is tested against. */
+internal val specDir: File = File(System.getProperty("murkio.spec") ?: "../spec")
 
 internal fun readSpec(path: String): Any? = Json.parse(File(specDir, path).readText())
 
@@ -43,12 +43,10 @@ internal class Call(val method: String, val path: String, val body: Any?, val he
 internal class Answer(val status: Int, val body: Any? = null, val headers: Map<String, String> = emptyMap()) {
     companion object {
         /** An API error with one detail. */
-        fun error(status: Int, code: String): Answer =
-            Answer(status, mapOf("details" to listOf(mapOf("code" to code, "message" to code))))
+        fun error(status: Int, code: String): Answer = Answer(status, mapOf("details" to listOf(mapOf("code" to code, "message" to code))))
 
         /** A `{"data": ...}` answer. */
-        fun data(data: Any?, status: Int = 200, headers: Map<String, String> = emptyMap()): Answer =
-            Answer(status, mapOf("data" to data), headers)
+        fun data(data: Any?, status: Int = 200, headers: Map<String, String> = emptyMap()): Answer = Answer(status, mapOf("data" to data), headers)
     }
 }
 
@@ -92,8 +90,14 @@ internal fun tokens(expiresIn: Int = 900, sessionId: String = "session-1", nowMs
     return mapOf(
         "access_token" to jwt(
             mapOf(
-                "iss" to "enterprise-auth", "sub" to "user-1", "aud" to "app-1", "sid" to sessionId,
-                "roles" to listOf("user"), "iat" to seconds, "exp" to seconds + expiresIn, "jti" to "j$counter",
+                "iss" to "enterprise-auth",
+                "sub" to "user-1",
+                "aud" to "app-1",
+                "sid" to sessionId,
+                "roles" to listOf("user"),
+                "iat" to seconds,
+                "exp" to seconds + expiresIn,
+                "jti" to "j$counter",
             ),
         ),
         "token_type" to "Bearer",

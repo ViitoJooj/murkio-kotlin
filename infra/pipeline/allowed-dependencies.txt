@@ -1,0 +1,9 @@
+# The runtime dependencies this SDK ships with, one per line, each with the
+# reason it is needed. infra/pipeline/verify_dependencies.py fails when the
+# manifest and this list disagree. The names are the ones build.gradle.kts
+# uses (the versions are in gradle/libs.versions.toml).
+
+composeBom              # keeps the Compose artifacts below on versions that work together
+libs.compose.ui         # the canvas and the fields are Compose UI
+libs.compose.foundation # layout, text fields and gestures of the canvas
+libs.coroutines.android # the client is suspend-based and refreshes the session in the background
