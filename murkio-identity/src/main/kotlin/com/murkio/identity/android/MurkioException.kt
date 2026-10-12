@@ -6,11 +6,7 @@ import com.murkio.identity.android.internal.obj
 import com.murkio.identity.android.internal.tableFor
 
 /** One problem reported by the API. */
-public class MurkioErrorDetail(
-    public val code: String,
-    public val message: String,
-    public val path: String?,
-)
+public class MurkioErrorDetail(public val code: String, public val message: String, public val path: String?)
 
 /**
  * Every failure the SDK reports. [code] is the stable API code (`rsb-00`,
@@ -41,8 +37,7 @@ public class MurkioException(
         }
 
         /** Any error as a [MurkioException] (`unknown` when it is something else). */
-        fun from(error: Throwable): MurkioException =
-            error as? MurkioException ?: MurkioException("unknown", 0, message = error.message ?: error.toString(), cause = error)
+        fun from(error: Throwable): MurkioException = error as? MurkioException ?: MurkioException("unknown", 0, message = error.message ?: error.toString(), cause = error)
     }
 }
 

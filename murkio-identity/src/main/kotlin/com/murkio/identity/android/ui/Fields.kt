@@ -58,8 +58,8 @@ import com.murkio.identity.android.canvas.pickCanvas
 import com.murkio.identity.android.internal.murkioString
 import com.murkio.identity.android.internal.normalizeLocale
 import com.murkio.identity.android.translateError
-import kotlinx.coroutines.launch
 import java.util.WeakHashMap
+import kotlinx.coroutines.launch
 
 /**
  * MurkioFormState joins the standalone composables of one form: the inputs
@@ -124,8 +124,7 @@ public class MurkioFormState internal constructor(public val client: MurkioClien
         private val shared = WeakHashMap<MurkioClient, MurkioFormState>()
 
         /** The form shared by every composable that is not inside a [MurkioIdentityForm]. */
-        fun shared(client: MurkioClient): MurkioFormState =
-            synchronized(shared) { shared.getOrPut(client) { MurkioFormState(client) } }
+        fun shared(client: MurkioClient): MurkioFormState = synchronized(shared) { shared.getOrPut(client) { MurkioFormState(client) } }
     }
 }
 
@@ -223,7 +222,7 @@ private fun FormHost(form: MurkioFormState) {
 
 @Composable
 private fun formLocale(form: MurkioFormState, locale: String?): String = normalizeLocale(
-    locale ?: form.client.configuredLocale ?: LocalConfiguration.current.locales.get(0)?.toLanguageTag() ?: "en",
+    locale ?: form.client.configuredLocale ?: LocalConfiguration.current.primaryLanguageTag() ?: "en",
 )
 
 @Composable
@@ -389,11 +388,7 @@ public fun MurkioIdentityRegisterButton(
 
 /** Shows the translated error (or notice) of its form. Draws nothing when there is nothing to say. */
 @Composable
-public fun MurkioIdentityError(
-    modifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle(color = Color(0xFFB42318)),
-    locale: String? = null,
-) {
+public fun MurkioIdentityError(modifier: Modifier = Modifier, textStyle: TextStyle = TextStyle(color = Color(0xFFB42318)), locale: String? = null) {
     val form = currentMurkioForm()
     FormHost(form)
     val state = formState(form)
@@ -418,5 +413,4 @@ public fun MurkioIdentityError(
  * ```
  */
 @Composable
-public fun rememberMurkioSession(client: MurkioClient? = null): androidx.compose.runtime.State<MurkioSession?> =
-    (client ?: Murkio.client).session.collectAsState()
+public fun rememberMurkioSession(client: MurkioClient? = null): androidx.compose.runtime.State<MurkioSession?> = (client ?: Murkio.client).session.collectAsState()

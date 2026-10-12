@@ -118,12 +118,12 @@ private fun isDataImage(value: String): Boolean {
     val prefix = DATA_PREFIXES.firstOrNull { value.startsWith(it) } ?: return false
     val data = value.substring(prefix.length).trimEnd('=')
     val padding = value.length - prefix.length - data.length
-    return data.isNotEmpty() && padding <= 2 &&
+    return data.isNotEmpty() &&
+        padding <= 2 &&
         data.all { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '+' || it == '/' }
 }
 
-private fun isImageSource(value: Any?): Boolean =
-    isHttpsUrl(value) || (value is String && value.length <= MAX_DATA_IMAGE_CHARS + 32 && isDataImage(value))
+private fun isImageSource(value: Any?): Boolean = isHttpsUrl(value) || (value is String && value.length <= MAX_DATA_IMAGE_CHARS + 32 && isDataImage(value))
 
 /** Builds the element from its props, or null when a prop breaks a rule. Unknown props are simply not read. */
 private fun element(id: String, type: CanvasElementType, props: Map<String, Any?>): CanvasElement? {
@@ -135,7 +135,8 @@ private fun element(id: String, type: CanvasElementType, props: Map<String, Any?
             val label = text(props["label"]) ?: return null
             if (invalidOptional("placeholder")) return null
             CanvasElement(
-                id, type,
+                id,
+                type,
                 label = label,
                 placeholder = optional("placeholder"),
                 showToggle = type == CanvasElementType.PASSWORD_INPUT && props["show_toggle"] == true,
@@ -146,7 +147,8 @@ private fun element(id: String, type: CanvasElementType, props: Map<String, Any?
         -> {
             val label = text(props["label"]) ?: return null
             CanvasElement(
-                id, type,
+                id,
+                type,
                 label = label,
                 defaultChecked = type == CanvasElementType.KEEP_LOGGED && props["default_checked"] == true,
             )
@@ -232,9 +234,14 @@ private fun layout(value: Any?, problems: MutableList<String>, path: String): Dr
     val items = LinkedHashMap<String, CanvasItem>()
     for ((id, raw) in rawItems) {
         val item = raw.obj()
-        if (item != null && isInt(item["x"], 0, width) && isInt(item["y"], 0, height) && isInt(item["w"], 1, width) &&
-            isInt(item["h"], 1, height) && int(item["x"]) + int(item["w"]) <= width &&
-            int(item["y"]) + int(item["h"]) <= height && isInt(item["z"], 0, 1000)
+        if (item != null &&
+            isInt(item["x"], 0, width) &&
+            isInt(item["y"], 0, height) &&
+            isInt(item["w"], 1, width) &&
+            isInt(item["h"], 1, height) &&
+            int(item["x"]) + int(item["w"]) <= width &&
+            int(item["y"]) + int(item["h"]) <= height &&
+            isInt(item["z"], 0, 1000)
         ) {
             items[id] = CanvasItem(int(item["x"]), int(item["y"]), int(item["w"]), int(item["h"]), int(item["z"]), item["hidden"] == true)
         } else {
@@ -246,8 +253,7 @@ private fun layout(value: Any?, problems: MutableList<String>, path: String): Dr
 
 private class Counter(var images: Int = 0)
 
-private fun isElementId(value: String): Boolean =
-    value.length in 1..32 && value.all { it in 'a'..'z' || it in '0'..'9' || it == '_' || it == '-' }
+private fun isElementId(value: String): Boolean = value.length in 1..32 && value.all { it in 'a'..'z' || it in '0'..'9' || it == '_' || it == '-' }
 
 private fun screen(value: Any?, problems: MutableList<String>, path: String, counter: Counter): CanvasScreen? {
     val map = value.obj()
@@ -363,7 +369,8 @@ internal fun sanitizeParsed(value: Any?): SanitizeResult {
 /** True when the screen still has what a password login needs (email, password and a submit action). */
 internal fun canSignIn(screen: CanvasScreen): Boolean {
     val types = screen.elements.map { it.type }.toSet()
-    return CanvasElementType.EMAIL_INPUT in types && CanvasElementType.PASSWORD_INPUT in types &&
+    return CanvasElementType.EMAIL_INPUT in types &&
+        CanvasElementType.PASSWORD_INPUT in types &&
         (CanvasElementType.LOGIN_BUTTON in types || CanvasElementType.REGISTER_BUTTON in types)
 }
 

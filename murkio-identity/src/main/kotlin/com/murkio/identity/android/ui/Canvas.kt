@@ -2,7 +2,6 @@ package com.murkio.identity.android.ui
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -146,7 +145,7 @@ public fun MurkioIdentityCanvas(
     val current = loaded ?: return
     val configuration = LocalConfiguration.current
     val language = normalizeLocale(
-        locale ?: murkio?.configuredLocale ?: configuration.locales.get(0)?.toLanguageTag() ?: "en",
+        locale ?: murkio?.configuredLocale ?: configuration.primaryLanguageTag() ?: "en",
     )
     val family = themeFontFamily(current.document.theme, fontFamily)
     val flow = current.flow
@@ -188,16 +187,7 @@ public fun MurkioIdentityCanvas(
 }
 
 @Composable
-private fun Frame(
-    loaded: Loaded,
-    state: FlowState,
-    screen: MurkioScreen,
-    locale: String,
-    family: FontFamily?,
-    oauth: Boolean,
-    onLink: (String) -> Unit,
-    modifier: Modifier,
-) {
+private fun Frame(loaded: Loaded, state: FlowState, screen: MurkioScreen, locale: String, family: FontFamily?, oauth: Boolean, onLink: (String) -> Unit, modifier: Modifier) {
     val document = loaded.document
     val theme = document.theme
     val signUp = screen == MurkioScreen.SIGN_UP && document.signUp != null
@@ -332,7 +322,9 @@ private fun Frame(
                                         BasicText(element.label!!.pick(locale), Modifier.weight(1f), style = look.textStyle(family))
                                     }
                                     CanvasElementType.LOGIN_BUTTON, CanvasElementType.REGISTER_BUTTON -> MurkioButton(
-                                        element.label!!.pick(locale), look, family,
+                                        element.label!!.pick(locale),
+                                        look,
+                                        family,
                                         onClick = { act(if (element.type == CanvasElementType.LOGIN_BUTTON) "login" else "register") },
                                         modifier = Fill,
                                         busy = state.busy,
@@ -341,20 +333,25 @@ private fun Frame(
                                         element.label?.pick(locale).orEmpty().ifEmpty {
                                             murkioString(locale, "oauth.continue", mapOf("provider" to providerName(element.provider!!)))
                                         },
-                                        look, family,
+                                        look,
+                                        family,
                                         onClick = { act("oauth", element.provider) },
                                         modifier = Fill,
                                         busy = state.busy,
                                     )
                                     CanvasElementType.FORGOT_PASSWORD_LINK -> MurkioButton(
-                                        element.label!!.pick(locale), look, family,
+                                        element.label!!.pick(locale),
+                                        look,
+                                        family,
                                         onClick = { act("forgot") },
                                         modifier = Fill,
                                         busy = state.busy,
                                         underline = true,
                                     )
                                     CanvasElementType.LINK -> MurkioButton(
-                                        element.text!!.pick(locale), look, family,
+                                        element.text!!.pick(locale),
+                                        look,
+                                        family,
                                         onClick = { onLink(element.href!!) },
                                         modifier = Fill,
                                         underline = true,

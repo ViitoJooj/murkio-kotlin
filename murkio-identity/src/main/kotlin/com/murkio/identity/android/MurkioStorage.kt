@@ -1,6 +1,8 @@
 package com.murkio.identity.android
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import com.murkio.identity.android.internal.base64Decode
@@ -78,11 +80,21 @@ internal class KeystoreStorage(context: Context) : MurkioStorage {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey())
         cipher.updateAAD(key.toByteArray(Charsets.UTF_8))
         val encrypted = cipher.iv + cipher.doFinal(value.toByteArray(Charsets.UTF_8))
-        preferences.edit().putString(key, base64UrlEncode(encrypted)).commit()
+        save { putString(key, base64UrlEncode(encrypted)) }
     }
 
     override fun delete(key: String) {
-        preferences.edit().remove(key).commit()
+        save { remove(key) }
+    }
+
+    /**
+     * Writes to disk before returning. A refresh rotates the token on the
+     * server: if the new one were still in memory when the process died, the
+     * old one on disk would end the session at the next start.
+     */
+    @SuppressLint("ApplySharedPref")
+    private fun save(change: SharedPreferences.Editor.() -> Unit) {
+        preferences.edit().apply(change).commit()
     }
 
     private fun secretKey(): SecretKey {

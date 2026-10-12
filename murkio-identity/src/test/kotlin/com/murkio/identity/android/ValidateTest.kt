@@ -9,6 +9,7 @@ import com.murkio.identity.android.internal.Json
 import com.murkio.identity.android.internal.JsonException
 import com.murkio.identity.android.internal.list
 import com.murkio.identity.android.internal.obj
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -16,11 +17,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 class ValidateTest {
-    private fun fixtures(kind: String): List<File> =
-        File(specDir, "canvas/fixtures/$kind").listFiles { file -> file.name.endsWith(".json") }!!.sortedBy { it.name }
+    private fun fixtures(kind: String): List<File> = File(specDir, "canvas/fixtures/$kind").listFiles { file -> file.name.endsWith(".json") }!!.sortedBy { it.name }
 
     private fun documentOf(file: File): Any? = Json.parse(file.readText()).obj()!!["document"]
 
@@ -91,8 +90,7 @@ class ValidateTest {
         document["screens"].obj()!!["sign_in"].obj()!!["elements"].list()!![index] as MutableMap<String, Any?>
 
     @Suppress("UNCHECKED_CAST")
-    private fun props(document: Map<String, Any?>, index: Int): MutableMap<String, Any?> =
-        element(document, index)["props"] as MutableMap<String, Any?>
+    private fun props(document: Map<String, Any?>, index: Int): MutableMap<String, Any?> = element(document, index)["props"] as MutableMap<String, Any?>
 
     @Test
     fun aTextWithBidiOrControlCharactersDropsItsElement() {
@@ -123,7 +121,11 @@ class ValidateTest {
     fun aStyleOutOfRangeIsIgnoredAndTheElementStays() {
         val document = base()
         element(document, 6)["style"] = mapOf(
-            "font_size" to 500.0, "opacity" to 3.0, "color" to "url(javascript:1)", "radius" to 12.0, "position" to "fixed",
+            "font_size" to 500.0,
+            "opacity" to 3.0,
+            "color" to "url(javascript:1)",
+            "radius" to 12.0,
+            "position" to "fixed",
         )
         val result = sanitizeParsed(document)
         val login = result.document!!.signIn.elements.first { it.id == "login" }

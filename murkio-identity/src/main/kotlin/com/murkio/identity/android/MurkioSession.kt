@@ -2,6 +2,7 @@ package com.murkio.identity.android
 
 import com.murkio.identity.android.internal.Json
 import com.murkio.identity.android.internal.obj
+import java.util.Collections
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Collections
 
 /** The signed-in session: the tokens and when the access token expires. */
 public class MurkioSession(
@@ -42,9 +42,12 @@ public class MurkioSession(
         ),
     )
 
-    override fun equals(other: Any?): Boolean =
-        other is MurkioSession && other.accessToken == accessToken && other.refreshToken == refreshToken &&
-            other.expiresAt == expiresAt && other.sessionId == sessionId && other.ephemeral == ephemeral
+    override fun equals(other: Any?): Boolean = other is MurkioSession &&
+        other.accessToken == accessToken &&
+        other.refreshToken == refreshToken &&
+        other.expiresAt == expiresAt &&
+        other.sessionId == sessionId &&
+        other.ephemeral == ephemeral
 
     override fun hashCode(): Int = arrayOf<Any>(accessToken, refreshToken, expiresAt, sessionId, ephemeral).contentHashCode()
 

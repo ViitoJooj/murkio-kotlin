@@ -6,6 +6,7 @@ import com.murkio.identity.android.internal.fnv1a32
 import com.murkio.identity.android.internal.normalizeLocale
 import com.murkio.identity.android.internal.obj
 import com.murkio.identity.android.internal.randomString
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 /** Opens a URL outside the app (the browser). Returns false when nothing could open it. */
 public fun interface MurkioUrlOpener {
@@ -268,5 +268,4 @@ internal fun queryOf(link: String): Map<String, String> {
     return result
 }
 
-private fun percentDecode(text: String): String =
-    runCatching { java.net.URLDecoder.decode(text, "UTF-8") }.getOrDefault(text)
+private fun percentDecode(text: String): String = runCatching { java.net.URLDecoder.decode(text, "UTF-8") }.getOrDefault(text)

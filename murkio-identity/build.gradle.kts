@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ktlint)
     `maven-publish`
 }
 
@@ -37,7 +38,7 @@ android {
             isIncludeAndroidResources = true
             all { test ->
                 // The tests read the vectors and fixtures every Murkio SDK shares.
-                test.systemProperty("murkio.spec", rootProject.file("../../spec").absolutePath)
+                test.systemProperty("murkio.spec", rootProject.file("spec").absolutePath)
                 // ScreenshotTest renders the canvas to a PNG when this is set.
                 System.getProperty("murkio.screenshots")?.let { test.systemProperty("murkio.screenshots", it) }
                 for (name in listOf("MURKIO_LIVE_API", "MURKIO_LIVE_PK", "MURKIO_LIVE_EMAIL", "MURKIO_LIVE_PASSWORD")) {
@@ -45,6 +46,14 @@ android {
                 }
             }
         }
+    }
+
+    lint {
+        // Android Lint is part of the pipeline: a warning fails it.
+        warningsAsErrors = true
+        abortOnError = true
+        // "A newer version is available" is Dependabot's job, in its own pull request.
+        disable += setOf("AndroidGradlePluginVersion", "GradleDependency", "NewerVersionAvailable")
     }
 
     publishing {
@@ -57,6 +66,14 @@ android {
 kotlin {
     // Every public declaration of the library states its visibility and its type.
     explicitApi()
+}
+
+ktlint {
+    android.set(true)
+    filter {
+        // Written by the identity service (sync-client-spec), not by hand.
+        exclude { it.file.name == "Spec.kt" }
+    }
 }
 
 dependencies {

@@ -17,11 +17,7 @@ public sealed class FlowStep(public val name: String) {
     public class Mfa internal constructor(internal val token: String) : FlowStep("mfa")
 
     /** The application requires 2FA: the user adds [secret] to an authenticator. */
-    public class MfaEnroll internal constructor(
-        internal val token: String,
-        public val secret: String,
-        public val otpauthUri: String,
-    ) : FlowStep("mfa_enroll")
+    public class MfaEnroll internal constructor(internal val token: String, public val secret: String, public val otpauthUri: String) : FlowStep("mfa_enroll")
 
     /** The recovery codes to save. The session starts after the user confirms. */
     public class RecoveryCodes(public val codes: List<String>) : FlowStep("recovery_codes")
@@ -51,11 +47,7 @@ public class FlowState(
 }
 
 /** What the user typed on the sign-in screen. */
-public class MurkioCredentials(
-    public val email: String,
-    public val password: String,
-    public val keepLogged: Boolean = false,
-)
+public class MurkioCredentials(public val email: String, public val password: String, public val keepLogged: Boolean = false)
 
 private fun normalizeEmail(email: String): String = email.trim().lowercase()
 
