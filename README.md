@@ -215,17 +215,29 @@ of the canvas itself come translated from the dashboard.
 
 ## Developing
 
-This repository is a git submodule of the Murkio identity service
-(`libs/external/kotlin`), and the commands below run from that checkout.
-
 ```sh
 ./gradlew :murkio-identity:testDebugUnitTest :murkio-identity:assembleRelease
 ```
 
-The tests run on the JVM (Robolectric for the Compose ones). They run the vectors and
-fixtures in `libs/spec` that every Murkio client SDK shares (the web SDK runs the same
-ones), so the canvas is laid out and the flows behave like on the web.
-`internal/Spec.kt` comes from `node libs/scripts/sync-client-spec.mjs`. Set
-`MURKIO_LIVE_API`, `MURKIO_LIVE_PK`, `MURKIO_LIVE_EMAIL` and `MURKIO_LIVE_PASSWORD` to also
-run `LiveTest` against a real API, and `-Dmurkio.screenshots=<dir>` to render the canvas
-to a PNG.
+The tests run on the JVM (Robolectric for the Compose ones, on Android 14 and on Android
+6.0, the oldest supported). They run the vectors and fixtures every Murkio client SDK
+shares (the web SDK runs the same ones), so the canvas is laid out and the flows behave
+like on the web. That copy (`spec/`), `internal/Spec.kt` and the checks in
+`infra/pipeline/` are kept in the Murkio identity service and synced from there, so they
+are not edited here. Set `MURKIO_LIVE_API`, `MURKIO_LIVE_PK`, `MURKIO_LIVE_EMAIL` and
+`MURKIO_LIVE_PASSWORD` to also run `LiveTest` against a real API, and
+`-Dmurkio.screenshots=<dir>` to render the canvas to a PNG.
+
+Every pull request runs the workflows in `.github/workflows`. The same checks, locally:
+
+| Workflow | What it runs |
+| --- | --- |
+| Build | `./gradlew :murkio-identity:assembleRelease :murkio-identity:publishReleasePublicationToMavenLocal` |
+| Format | `./gradlew :murkio-identity:ktlintCheck` (`ktlintFormat` fixes) |
+| Lint | `./gradlew :murkio-identity:lintRelease` (Android Lint, a warning fails it); the compiler also treats warnings as errors |
+| Tests | `./gradlew :murkio-identity:testDebugUnitTest` |
+| Quality & Governance Checks | `for check in infra/pipeline/*.py; do python3 "$check"; done` |
+| Security | `gitleaks git .`, `zizmor --pedantic .` |
+| CodeQL, Dependency Review | run by GitHub on the pull request |
+
+Security reports: see [SECURITY.md](SECURITY.md).
